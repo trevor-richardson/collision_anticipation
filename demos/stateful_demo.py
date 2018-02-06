@@ -14,12 +14,14 @@ import tensorflow as tf
 from os.path import isfile, join
 from os import listdir
 import os
-dir_path = os.path.dirname(os.path.realpath(__file__))
-dir_path = dir_path.split('robotics-research')[0]
+import configparser
+
+config = configparser.ConfigParser()
+config.read('../config.ini')
+
+dir_path = config['DEFAULT']['BASE_DIR']
 
 '''
-TODOS!!!!
--Make this a class with gross code at the beggining in an __init__ function
 -Make pyQt graphs live with this demo
 
 To run this code make sure you use the following in order to load hit and miss or replay the last video
@@ -37,13 +39,13 @@ pool = ThreadPool(processes=1)
 '''
 The following loads my model for predictions
 '''
-json_file = open(dir_path + 'robotics-research/deep_learning/keras/saved_models/stateful_model/current_version/current_model.json', 'r')
+json_file = open(dir_path + '/machine_learning/saved_models/stateful_model/current_version/current_model.json', 'r')
 loaded_model_json = json_file.read()
 json_file.close()
 loaded_model = model_from_json(loaded_model_json)
 # load weights into new model
 # with tf.device('/gpu:0'):
-loaded_model.load_weights(dir_path + 'robotics-research/deep_learning/keras/saved_models/stateful_model/current_version/weights9067.h5')
+loaded_model.load_weights(dir_path + '/machine_learning/saved_models/stateful_model/current_version/weights9067.h5')
 loaded_model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
 graph = tf.get_default_graph()
 
@@ -174,10 +176,10 @@ Right now I'm running on training data for the hits
 def load_hit_or_miss_npy(hit_bool):
 
     txt_files = []
-    read_hit = dir_path + 'robotics-research/vrep_scripts/saved_vel_pos_data/test/hit/'
-    read_miss = dir_path + 'robotics-research/vrep_scripts/saved_vel_pos_data/test/miss/'
-    write_pos = dir_path + 'robotics-research/demos/vrep_pos_velo/pos.txt'
-    write_velo = dir_path + 'robotics-research/demos/vrep_pos_velo/velo.txt'
+    read_hit = dir_path + '/vrep_scripts/saved_vel_pos_data/test/hit/'
+    read_miss = dir_path + '/vrep_scripts/saved_vel_pos_data/test/miss/'
+    write_pos = dir_path + '/demos/vrep_pos_velo/pos.txt'
+    write_velo = dir_path + '/demos/vrep_pos_velo/velo.txt'
 
     if hit_bool:
         print("loading hit")
@@ -240,7 +242,7 @@ def single_simulation(n_iter):
 
 def main(iter_start, iter_end):
     #load keras model for prediction once
-    # loaded_model = load_deep_architecture('robotics-research/deep_learning/saved_models/small_model_1/model_ran.json', 'robotics-research/deep_learning/saved_models/small_model_1/weights006.h5')
+    # loaded_model = load_deep_architecture('/deep_learning/saved_models/small_model_1/model_ran.json', '/deep_learning/saved_models/small_model_1/weights006.h5')
     #run n number of trials for demo purposes
     for current_iteration in range(iter_start, iter_end):
         single_simulation(current_iteration)
