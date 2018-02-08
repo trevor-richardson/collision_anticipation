@@ -37,9 +37,7 @@ class VisualizeActivations(object):
         count = 0
         prev_var =0
         for element in self.activation_list:
-            # print (element[0].shape , "should be batch size 1, 2, 32, 32, 20")
             var = element[self.layer][0][self.h_or_c]
-            # print("length", len(var[0][0]))
             for filter_no in range(len(var[0][0])):
                 var2 = (var[:, :, filter_no])
                 var2 = 255*var2
