@@ -54,6 +54,9 @@ parser.add_argument('--exp_iteration', type=int, default=64, metavar='N',
 parser.add_argument('--batch_size', type=int, default=64, metavar='N',
                     help='Number of hit and number of miss videos (default 64)')
 
+parser.add_argument('--view_model_params', type=str2bool, nargs='?', default=False,
+                    help='This variable stores outputs and targets in a list to bp all at once (default: True)')
+
 parser.add_argument('--num_epochs', type=int, default=50, metavar='N',
                     help='Number of hit and number of miss videos (default 50)')
 
@@ -111,8 +114,8 @@ args = parser.parse_args()
 '''Define my model'''
 rgb_shape = (3, 64, 64)
 model = Custom_Spatial_Temporal_Anticipation_NN(rgb_shape, (args.no_filters_0,
-    args.no_filters_1, args.no_filters_2), (args.kernel_0, args.kernel_0), args.strides,
-    args.drop_rte, 1)
+    args.no_filters_1, args.no_filters_2), (args.kernel_0, args.kernel_0), args.strides, 1,
+    padding=0, dropout_rte=args.drop_rte)
 if torch.cuda.is_available():
     model.cuda()
     print("Using GPU acceleration")
@@ -131,7 +134,7 @@ def train_model(epoch, data_files, label):
     train_step_counter = 0
 
     for index in range(int(len(data_files)/args.batch_size)):
-
+        print(index)
         current_video = load_next_batch(data_files[index*args.batch_size:(index+1)*args.batch_size])
         current_label = np.asarray(label[index*args.batch_size:(index+1)*args.batch_size])
         # print(current_label.shape)
@@ -140,9 +143,9 @@ def train_model(epoch, data_files, label):
             target = target.cuda()
         target = Variable(target)
 
-        prev0 = create_lstm_states((3, 64, 64))
-        prev1 = create_lstm_states(model.convlstm_0.output_shape)
-        prev2 = create_lstm_states(model.convlstm_1.output_shape)
+        prev0 = create_lstm_states(model.convlstm_0.output_shape)
+        prev1 = create_lstm_states(model.convlstm_1.output_shape)
+        prev2 = create_lstm_states(model.convlstm_2.output_shape)
         states = [prev0, prev1, prev2]
         optimizer.zero_grad()
 
@@ -151,14 +154,13 @@ def train_model(epoch, data_files, label):
             if torch.cuda.is_available():
                 data = data.cuda()
             data = Variable(data)
-            print(inner_index)
 
             output, states = model(data, states)
             predicted_list.append(F.sigmoid(output))
             y_list.append(target)
 
         pred = torch.cat(predicted_list)
-        y_ = torch.cat(y_list).long()
+        y_ = torch.cat(y_list).float()
         loss = F.binary_cross_entropy(pred, y_)
 
         loss.backward()
@@ -171,11 +173,8 @@ def train_model(epoch, data_files, label):
 
     print("Training time for one epoch", time.time() - tim)
     # print(loss.data[0], train_loss.cpu().numpy()[0], train_loss.cpu().numpy()[0]/train_step_counter)
-    print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-        epoch, args.batch_size * len(data_files), len(data_files),
-        100. * args.batch_size / len(data_files), train_loss.cpu().numpy()[0]/train_step_counter))
-
-
+    print('Train Epoch: {}\tLoss: {:.6f}'.format(
+        epoch, train_loss.cpu().numpy()[0]/train_step_counter))
 
 
 '''Testing/Validation'''
@@ -215,7 +214,8 @@ def view_image(image, name):
 '''Initialize experiment'''
 def main():
     global model
-    print_parameters(model.parameters())
+    if args.view_model_params:
+        print_parameters(model.parameters())
 
     training_directory = base_dir + '/data_generated/image_only/train/'
     validation_directory = base_dir + '/data_generated/image_only/val/'
@@ -226,8 +226,7 @@ def main():
 
     #returns absolute path to files of videos
     train, train_class, val, val_class, test, test_class = generator.prepare_data()
-    # current_video = load_next_batch(train[:args.batch_size])
-    # train_model(1, train, train_class)
+
     for index in range(args.num_epochs):
         train_model(index, train, train_class)
 

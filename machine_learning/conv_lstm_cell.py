@@ -9,62 +9,64 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import sys
+import math
 
 class StatefulConv2dLSTMCell(nn.Module):
-    def __init__(self, input_shape, no_filters, kernel_shape, strides, padding='nopad', weight_init=None, reccurent_weight_init=None,  cell_weight_init=None, bias_init=None, drop=None, rec_drop=None):
+    def __init__(self, input_shape, no_filters, kernel_shape, strides, pad=0, weight_init=None, reccurent_weight_init=None,  cell_weight_init=None, bias_init=None, drop=None, rec_drop=None):
         super(StatefulConv2dLSTMCell, self).__init__()
 
-        if(weight_init==None):
-            #weights need to be the shape of input or x and the output
-            self.W_f = nn.Parameter(torch.zeros(kernel_shape[0], kernel_shape[1], int(input_shape[-1]), no_filters))
-            self.W_f = nn.init.xavier_normal(self.W_f)
-            self.W_i = nn.Parameter(torch.zeros(kernel_shape[0], kernel_shape[1], int(input_shape[-1]), no_filters))
-            self.W_i = nn.init.xavier_normal(self.W_i)
-            self.W_o = nn.Parameter(torch.zeros(kernel_shape[0], kernel_shape[1], int(input_shape[-1]), no_filters))
-            self.W_o = nn.init.xavier_normal(self.W_o)
-            self.W_c = nn.Parameter(torch.zeros(kernel_shape[0], kernel_shape[1], int(input_shape[-1]), no_filters))
-            self.W_c = nn.init.xavier_normal(self.W_c)
-        else:
-            self.W_f = nn.Parameter(torch.zeros(kernel_shape[0], kernel_shape[1], int(input_shape[-1]), no_filters))
-            self.W_f = weight_init(self.W_f)
-            self.W_i = nn.Parameter(torch.zeros(kernel_shape[0], kernel_shape[1], int(input_shape[-1]), no_filters))
-            self.W_i = weight_init(self.W_i)
-            self.W_o = nn.Parameter(torch.zeros(kernel_shape[0], kernel_shape[1], int(input_shape[-1]), no_filters))
-            self.W_o = weight_init(self.W_o)
-            self.W_c = nn.Parameter(torch.zeros(kernel_shape[0], kernel_shape[1], int(input_shape[-1]), no_filters))
-            self.W_c = weight_init(self.W_c)
+        # if(weight_init==None):
+        #     #weights need to be the shape of input or x and the output
+        #     self.W_f = nn.Parameter(torch.zeros(kernel_shape[0], kernel_shape[1], int(input_shape[-1]), no_filters))
+        #     self.W_f = nn.init.xavier_normal(self.W_f)
+        #     self.W_i = nn.Parameter(torch.zeros(kernel_shape[0], kernel_shape[1], int(input_shape[-1]), no_filters))
+        #     self.W_i = nn.init.xavier_normal(self.W_i)
+        #     self.W_o = nn.Parameter(torch.zeros(kernel_shape[0], kernel_shape[1], int(input_shape[-1]), no_filters))
+        #     self.W_o = nn.init.xavier_normal(self.W_o)
+        #     self.W_c = nn.Parameter(torch.zeros(kernel_shape[0], kernel_shape[1], int(input_shape[-1]), no_filters))
+        #     self.W_c = nn.init.xavier_normal(self.W_c)
+        # else:
+        #     self.W_f = nn.Parameter(torch.zeros(kernel_shape[0], kernel_shape[1], int(input_shape[-1]), no_filters))
+        #     self.W_f = weight_init(self.W_f)
+        #     self.W_i = nn.Parameter(torch.zeros(kernel_shape[0], kernel_shape[1], int(input_shape[-1]), no_filters))
+        #     self.W_i = weight_init(self.W_i)
+        #     self.W_o = nn.Parameter(torch.zeros(kernel_shape[0], kernel_shape[1], int(input_shape[-1]), no_filters))
+        #     self.W_o = weight_init(self.W_o)
+        #     self.W_c = nn.Parameter(torch.zeros(kernel_shape[0], kernel_shape[1], int(input_shape[-1]), no_filters))
+        #     self.W_c = weight_init(self.W_c)
+        #
+        # if(reccurent_weight_init == None):
+        #     #Weight matrices for hidden state
+        #     self.U_f = nn.Parameter(torch.zeros(kernel_shape[0], kernel_shape[1], no_filters, no_filters))
+        #     self.U_f = nn.init.xavier_normal(self.U_f)
+        #     self.U_i = nn.Parameter(torch.zeros(kernel_shape[0], kernel_shape[1], no_filters, no_filters))
+        #     self.U_i = nn.init.xavier_normal(self.U_i)
+        #     self.U_o = nn.Parameter(torch.zeros(kernel_shape[0], kernel_shape[1], no_filters, no_filters))
+        #     self.U_o = nn.init.xavier_normal(self.U_o)
+        #     self.U_c = nn.Parameter(torch.zeros(kernel_shape[0], kernel_shape[1], no_filters, no_filters))
+        #     self.U_c = nn.init.xavier_normal(self.U_c)
+        # else:
+        #     self.U_f = nn.Parameter(torch.zeros(kernel_shape[0], kernel_shape[1], no_filters, no_filters))
+        #     self.U_f = recurrent_weight_initializer(self.U_f)
+        #     self.U_i = nn.Parameter(torch.zeros(kernel_shape[0], kernel_shape[1], no_filters, no_filters))
+        #     self.U_i = recurrent_weight_initializer(self.U_i)
+        #     self.U_o = nn.Parameter(torch.zeros(kernel_shape[0], kernel_shape[1], no_filters, no_filters))
+        #     self.U_o = recurrent_weight_initializer(self.U_o)
+        #     self.U_c = nn.Parameter(torch.zeros(kernel_shape[0], kernel_shape[1], no_filters, no_filters))
+        #     self.U_c = recurrent_weight_initializer(self.U_c)
 
-        if(reccurent_weight_init == None):
-            #Weight matrices for hidden state
-            self.U_f = nn.Parameter(torch.zeros(kernel_shape[0], kernel_shape[1], no_filters, no_filters))
-            self.U_f = nn.init.xavier_normal(self.U_f)
-            self.U_i = nn.Parameter(torch.zeros(kernel_shape[0], kernel_shape[1], no_filters, no_filters))
-            self.U_i = nn.init.xavier_normal(self.U_i)
-            self.U_o = nn.Parameter(torch.zeros(kernel_shape[0], kernel_shape[1], no_filters, no_filters))
-            self.U_o = nn.init.xavier_normal(self.U_o)
-            self.U_c = nn.Parameter(torch.zeros(kernel_shape[0], kernel_shape[1], no_filters, no_filters))
-            self.U_c = nn.init.xavier_normal(self.U_c)
-        else:
-            self.U_f = nn.Parameter(torch.zeros(kernel_shape[0], kernel_shape[1], no_filters, no_filters))
-            self.U_f = recurrent_weight_initializer(self.U_f)
-            self.U_i = nn.Parameter(torch.zeros(kernel_shape[0], kernel_shape[1], no_filters, no_filters))
-            self.U_i = recurrent_weight_initializer(self.U_i)
-            self.U_o = nn.Parameter(torch.zeros(kernel_shape[0], kernel_shape[1], no_filters, no_filters))
-            self.U_o = recurrent_weight_initializer(self.U_o)
-            self.U_c = nn.Parameter(torch.zeros(kernel_shape[0], kernel_shape[1], no_filters, no_filters))
-            self.U_c = recurrent_weight_initializer(self.U_c)
-
+        #This needs to be different depending on padding
         if(cell_weight_init == None):
             #Weight matrices for hidden state
-            tup = (int(int(input_shape[1] - kernel_shape[0] + 1) / strides), int( int(input_shape[2] - kernel_shape[1] + 1) / strides), no_filters)
+            # tup = (int(int(input_shape[1] - kernel_shape[0] + 1) / strides), int( int(input_shape[2] - kernel_shape[1] + 1) / strides), no_filters)
             self.V_f = nn.Parameter(torch.zeros(
-                int(int(input_shape[1] - kernel_shape[0] + 1) / strides), int( int(input_shape[2] - kernel_shape[1] + 1) / strides), no_filters))
+                no_filters, int(int(math.ceil((input_shape[1] - kernel_shape[0] + 1) / (strides)))), int( math.ceil((input_shape[2] - kernel_shape[1] + 1) / strides))))
             self.V_f = nn.init.xavier_normal(self.V_f)
             self.V_i = nn.Parameter(torch.zeros(
-                int( int(input_shape[1] - kernel_shape[0] + 1) / strides), int( int(input_shape[2] - kernel_shape[1] + 1) / strides), no_filters))
+                no_filters, int( int(math.ceil((input_shape[1] - kernel_shape[0] + 1) / (strides)))), int( math.ceil((input_shape[2] - kernel_shape[1] + 1) / strides))))
             self.V_i = nn.init.xavier_normal(self.V_i)
             self.V_o = nn.Parameter(torch.zeros(
-                int( int(input_shape[1] - kernel_shape[0] + 1) / strides), int( int(input_shape[2] - kernel_shape[1] + 1) / strides), no_filters))
+                no_filters, int( int(math.ceil((input_shape[1] - kernel_shape[0] + 1) / (strides)))), int( math.ceil((input_shape[2] - kernel_shape[1] + 1) / strides))))
             self.V_o = nn.init.xavier_normal(self.V_o)
         else:
             self.V_f = nn.Parameter(torch.zeros(
@@ -93,12 +95,18 @@ class StatefulConv2dLSTMCell(nn.Module):
         self.kernel = kernel_shape
         self.no_filters = no_filters
         self.inp_shape = input_shape
-        self.pad = padding
 
         #for now no padding
-        # print(self.U_f.size(), self.W_f.size(), kernel_shape)
-        self.conv2d_w = nn.Conv2d(input_shape[0], no_filters, kernel_shape, stride=strides) #Need to define the convolutional layers for pytorch
-        self.conv2d_h = nn.Conv2d(no_filters, no_filters, kernel_shape, stride=strides)
+
+        self.conv2d_x_f = nn.Conv2d(input_shape[0], no_filters, kernel_shape, stride=strides, padding=pad)
+        self.conv2d_x_i = nn.Conv2d(input_shape[0], no_filters, kernel_shape, stride=strides, padding=pad)
+        self.conv2d_x_o = nn.Conv2d(input_shape[0], no_filters, kernel_shape, stride=strides, padding=pad)
+        self.conv2d_x_c = nn.Conv2d(input_shape[0], no_filters, kernel_shape, stride=strides, padding=pad)
+        self.conv2d_h_f = nn.Conv2d(no_filters, no_filters, kernel_shape, padding=2)
+        self.conv2d_h_i = nn.Conv2d(no_filters, no_filters, kernel_shape, padding=2)
+        self.conv2d_h_o = nn.Conv2d(no_filters, no_filters, kernel_shape, padding=2)
+        self.conv2d_h_c = nn.Conv2d(no_filters, no_filters, kernel_shape, padding=2)
+
         self.output_shape = self.V_o.size()
         if(drop==None):
             self.dropout = nn.Dropout(0)
@@ -117,20 +125,24 @@ class StatefulConv2dLSTMCell(nn.Module):
         c_t_previous = self.rec_dropout(c_t_previous)
 
         #f(t) = sigmoid(W_f (conv) x(t) + U_f (conv) h(t-1) + V_f (*) c(t-1)  + b_f)
+        # print(c_t_previous.size())
+        # print(self.b_f.size())
+        # print((torch.transpose(c_t_previous, 1, 3) + self.b_f).size(), "here we are")
+
         f_t = F.sigmoid(
-            self.conv2d_w(X_t) + self.conv2d_h(h_t_previous) + c_t_previous * self.V_f + self.b_f #w_f needs to be the previous input shape by the number of hidden neurons
+            self.conv2d_x_f(X_t) + self.conv2d_h_f(h_t_previous) + c_t_previous * self.V_f  #w_f needs to be the previous input shape by the number of hidden neurons
         )
         #i(t) = sigmoid(W_i (conv) x(t) + U_i (conv) h(t-1) + V_i (*) c(t-1)  + b_i)
         i_t = F.sigmoid(
-            self.conv2d_w(X_t) + self.conv2d_h(h_t_previous) + c_t_previous * self.V_i + self.b_i
+            self.conv2d_x_i(X_t) + self.conv2d_h_i(h_t_previous) + c_t_previous * self.V_i
         )
         #o(t) = sigmoid(W_o (conv) x(t) + U_o (conv) h(t-1) + V_i (*) c(t-1) + b_o)
         o_t = F.sigmoid(
-            self.conv2d_w(X_t) + self.conv2d_h(h_t_previous) + c_t_previous * self.V_o + self.b_o
+            self.conv2d_x_o(X_t) + self.conv2d_h_o(h_t_previous) + c_t_previous * self.V_o
         )
         #c(t) = f(t) (*) c(t-1) + i(t) (*) hypertan(W_c (conv) x_t + U_c (conv) h(t-1) + b_c)
         c_hat_t = F.tanh(
-            self.conv2d_w(X_t) + self.conv2d_h(h_t_previous) + self.b_c
+            self.conv2d_x_c(X_t) + self.conv2d_h_c(h_t_previous)
         )
         c_t = (f_t * c_t_previous) + (i_t * c_hat_t)
         #h_t = o_t * tanh(c_t)
