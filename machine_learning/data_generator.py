@@ -6,16 +6,16 @@ from os.path import isfile, join
 from os import listdir
 
 class VideoDataGenerator(object):
-    def __init__(self, train_dir, val_dir, test_dir, train_hit, train_miss, val_hit, val_miss, test_hit, test_miss):
+    def __init__(self, train_dir, val_dir, test_dir, train, val, test):
         self.training_directory = train_dir
         self.validation_directory = val_dir
         self.testing_directory = test_dir
-        self.train_number_of_hit = train_hit
-        self.train_number_of_miss = train_miss
-        self.val_number_of_hit = val_hit
-        self.val_number_of_miss = val_miss
-        self.test_number_of_hit = test_hit
-        self.test_number_of_miss = test_miss
+        self.train_number_of_hit = train
+        self.train_number_of_miss = train
+        self.val_number_of_hit = val
+        self.val_number_of_miss = val
+        self.test_number_of_hit = test
+        self.test_number_of_miss = test
 
     def prepare_data(self):
         print("Preparing data files")

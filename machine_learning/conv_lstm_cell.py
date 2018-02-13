@@ -2,6 +2,7 @@
 The following is a class the allows one to utilize a stateful lstm model in pytorch
 This allows for the reset state to be a hyperparameter in which you can learn the most generalizable model based on how long the recurrency analysis should be
 PARAMETERS
+NEED TO MAKE PADDING AVAILABLE
 '''
 
 import torch
@@ -95,6 +96,7 @@ class StatefulConv2dLSTMCell(nn.Module):
         self.pad = padding
 
         #for now no padding
+        # print(self.U_f.size(), self.W_f.size(), kernel_shape)
         self.conv2d_w = nn.Conv2d(input_shape[0], no_filters, kernel_shape, stride=strides) #Need to define the convolutional layers for pytorch
         self.conv2d_h = nn.Conv2d(no_filters, no_filters, kernel_shape, stride=strides)
         self.output_shape = self.V_o.size()
@@ -116,19 +118,19 @@ class StatefulConv2dLSTMCell(nn.Module):
 
         #f(t) = sigmoid(W_f (conv) x(t) + U_f (conv) h(t-1) + V_f (*) c(t-1)  + b_f)
         f_t = F.sigmoid(
-            self.conv2d_w(X_t, self.W_f, self.stride, pad=self.pad) + self.conv2d_h(h_t_previous, self.U_f, [1, 1, 1, 1]) + c_t_previous * self.V_f + self.b_f #w_f needs to be the previous input shape by the number of hidden neurons
+            self.conv2d_w(X_t) + self.conv2d_h(h_t_previous) + c_t_previous * self.V_f + self.b_f #w_f needs to be the previous input shape by the number of hidden neurons
         )
         #i(t) = sigmoid(W_i (conv) x(t) + U_i (conv) h(t-1) + V_i (*) c(t-1)  + b_i)
         i_t = F.sigmoid(
-            self.conv2d_w(X_t, self.W_i, self.stride, pad=self.pad) + self.conv2d_h(h_t_previous, self.U_i, [1, 1, 1, 1]) + c_t_previous * self.V_i + self.b_i
+            self.conv2d_w(X_t) + self.conv2d_h(h_t_previous) + c_t_previous * self.V_i + self.b_i
         )
         #o(t) = sigmoid(W_o (conv) x(t) + U_o (conv) h(t-1) + V_i (*) c(t-1) + b_o)
         o_t = F.sigmoid(
-            self.conv2d_w(X_t, self.W_o, self.stride, pad=self.pad) + self.conv2d_h(h_t_previous, self.U_o, [1, 1, 1, 1]) + c_t_previous * self.V_o + self.b_o
+            self.conv2d_w(X_t) + self.conv2d_h(h_t_previous) + c_t_previous * self.V_o + self.b_o
         )
         #c(t) = f(t) (*) c(t-1) + i(t) (*) hypertan(W_c (conv) x_t + U_c (conv) h(t-1) + b_c)
         c_hat_t = F.tanh(
-            self.conv2d_w(X_t, self.W_c, self.stride) + self.conv2d_h(h_t_previous, self.U_c, [1, 1, 1, 1]) + self.b_c
+            self.conv2d_w(X_t) + self.conv2d_h(h_t_previous) + self.b_c
         )
         c_t = (f_t * c_t_previous) + (i_t * c_hat_t)
         #h_t = o_t * tanh(c_t)
