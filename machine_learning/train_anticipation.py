@@ -125,6 +125,7 @@ optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
 '''Training'''
 def train_model(epoch, data_files, label):
     global model
+    model.train()
 
     tim = time.time()
     predicted_list = []
@@ -134,7 +135,6 @@ def train_model(epoch, data_files, label):
     train_step_counter = 0
 
     for index in range(int(len(data_files)/args.batch_size)):
-        print(index)
         current_video = load_next_batch(data_files[index*args.batch_size:(index+1)*args.batch_size])
         current_label = np.asarray(label[index*args.batch_size:(index+1)*args.batch_size])
         # print(current_label.shape)
@@ -178,6 +178,48 @@ def train_model(epoch, data_files, label):
 
 
 '''Testing/Validation'''
+def test_model(data_files, label):
+    global model
+    model.eval()
+
+    tim = time.time()
+    test_loss = 0
+    correct = 0
+    instance_counter = 0
+    test_step_counter = 0
+
+    for index in range(int(len(data_files)/args.batch_size)):
+        current_video = load_next_batch(data_files[index*args.batch_size:(index+1)*args.batch_size])
+        current_label = np.asarray(label[index*args.batch_size:(index+1)*args.batch_size])
+        # print(current_label.shape)
+        target = torch.from_numpy((current_label))
+        if torch.cuda.is_available():
+            target = target.cuda()
+        target = Variable(target.float())
+
+        prev0 = create_lstm_states(model.convlstm_0.output_shape)
+        prev1 = create_lstm_states(model.convlstm_1.output_shape)
+        prev2 = create_lstm_states(model.convlstm_2.output_shape)
+        states = [prev0, prev1, prev2]
+
+        for inner_index in range(int(current_video.shape[0])):
+            data = torch.from_numpy(current_video[inner_index]).float()
+            if torch.cuda.is_available():
+                data = data.cuda()
+            data = Variable(data, volatile=True)
+
+            output, states = model(data, states)
+            test_loss += F.binary_cross_entropy(F.sigmoid(output), target, size_average=False).data[0] # sum up batch loss
+            pred = F.sigmoid(output).data.max(1, keepdim=True)[0] # get the index of the max log-probability
+            correct += pred.eq(target.data.view_as(pred)).sum()
+            instance_counter+=1
+
+
+    test_loss /= (instance_counter * args.batch_size)
+    print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.4f}%)'.format(
+        test_loss, correct, instance_counter * args.batch_size,
+        100. * correct / (instance_counter * args.batch_size)))
+    return str(100. * correct / (instance_counter * args.batch_size))
 
 
 '''Helper Functions'''
@@ -227,8 +269,11 @@ def main():
     #returns absolute path to files of videos
     train, train_class, val, val_class, test, test_class = generator.prepare_data()
 
+
+
     for index in range(args.num_epochs):
         train_model(index, train, train_class)
+        test_model(val, val_class)
 
 
 if __name__ == '__main__':
