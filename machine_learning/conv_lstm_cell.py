@@ -97,6 +97,7 @@ class StatefulConv2dLSTMCell(nn.Module):
         #for now no padding
         self.conv2d_w = nn.Conv2d(input_shape[0], no_filters, kernel_shape, stride=strides) #Need to define the convolutional layers for pytorch
         self.conv2d_h = nn.Conv2d(no_filters, no_filters, kernel_shape, stride=strides)
+        self.output_shape = self.V_o.size()
         if(drop==None):
             self.dropout = nn.Dropout(0)
         else:
@@ -125,7 +126,6 @@ class StatefulConv2dLSTMCell(nn.Module):
         o_t = F.sigmoid(
             self.conv2d_w(X_t, self.W_o, self.stride, pad=self.pad) + self.conv2d_h(h_t_previous, self.U_o, [1, 1, 1, 1]) + c_t_previous * self.V_o + self.b_o
         )
-
         #c(t) = f(t) (*) c(t-1) + i(t) (*) hypertan(W_c (conv) x_t + U_c (conv) h(t-1) + b_c)
         c_hat_t = F.tanh(
             self.conv2d_w(X_t, self.W_c, self.stride) + self.conv2d_h(h_t_previous, self.U_c, [1, 1, 1, 1]) + self.b_c
@@ -137,7 +137,7 @@ class StatefulConv2dLSTMCell(nn.Module):
 
         return h_t, c_t
 
-#I prefer hard sigmoid for gradient passing
+#I prefer hard sigmoid for gradient passing this was my tensorflow way of doing it
 # def hard_sigmoid(x):
 #     """hard sigmoid for convlstm"""
 #     x = (0.2 * x) + 0.5
