@@ -15,12 +15,12 @@ class VisualizeActivations(object):
         self.layer = 0
         self.stride = 5
         self.activation_list = act_list #shape should be list of [next0, next1, next2] -- next0 should be shape 64, 2, 32, 32, 20
-        self.h_or_c = 1 #1 if I want c
+        self.h_or_c = 0 #1 if I want c
 
         print("initializing visualizer")
         self.video = movie
         if self.layer == 0:
-            self.num_row = 6
+            self.num_row = 7
             self.num_column = 6
         elif self.layer == 1:
             self.num_row = 7
@@ -57,7 +57,7 @@ class VisualizeActivations(object):
         count = 0
         stride_count = 1
         plt.subplot(self.num_row, self.num_column, 1)
-        plt.imshow(original_image)
+        plt.imshow(np.transpose(original_image, (1, 2, 0)))
         plt.title('Original Image')
         frame1 = plt.gca()
         frame1.axes.get_xaxis().set_ticks([])

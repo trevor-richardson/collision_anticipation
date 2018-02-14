@@ -124,11 +124,6 @@ class StatefulConv2dLSTMCell(nn.Module):
         h_t_previous = self.rec_dropout(h_t_previous)
         c_t_previous = self.rec_dropout(c_t_previous)
 
-        #f(t) = sigmoid(W_f (conv) x(t) + U_f (conv) h(t-1) + V_f (*) c(t-1)  + b_f)
-        # print(c_t_previous.size())
-        # print(self.b_f.size())
-        # print((torch.transpose(c_t_previous, 1, 3) + self.b_f).size(), "here we are")
-
         f_t = F.sigmoid(
             self.conv2d_x_f(X_t) + self.conv2d_h_f(h_t_previous) + c_t_previous * self.V_f  #w_f needs to be the previous input shape by the number of hidden neurons
         )

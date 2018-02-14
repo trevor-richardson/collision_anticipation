@@ -23,19 +23,16 @@ config.read('../config.ini')
 base_dir = config['DEFAULT']['BASE_DIR']
 from data_generator import VideoDataGenerator
 from anticipation_model import Custom_Spatial_Temporal_Anticipation_NN
+from visualizer import VisualizeActivations
 
 '''Argparse Variables for Dynamic Experimentation
 
-
-Need to finish training and test/val
-Need to visualize outputs
 Need to allow for padding
 Need to implement demo with current system
 Need to update readme and take a video
 Need to post open to github
 
 '''
-#for argparser to handle bool
 
 def str2bool(v):
     if v.lower() in ('yes', 'true', 't', 'y', '1'):
@@ -56,6 +53,18 @@ parser.add_argument('--batch_size', type=int, default=64, metavar='N',
 
 parser.add_argument('--view_model_params', type=str2bool, nargs='?', default=False,
                     help='This variable stores outputs and targets in a list to bp all at once (default: True)')
+
+parser.add_argument('--hit_or_miss', type=str2bool, nargs='?', default=False,
+                    help='Default is false which means a hit video')
+
+parser.add_argument('--exp_type', default='train', type=str,
+                    help='This is type of expirement I want to run (train, test, visualize)')
+
+parser.add_argument('--visualize_str', default='h_t', type=str,
+                    help='If we are visualizing the hidden activations or cell state use this')
+
+parser.add_argument('--model_to_load', default='87.75111607142857', type=str,
+                    help='This is the model of interest to load')
 
 parser.add_argument('--num_epochs', type=int, default=50, metavar='N',
                     help='Number of hit and number of miss videos (default 50)')
@@ -121,10 +130,8 @@ if torch.cuda.is_available():
     print("Using GPU acceleration")
 optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
 
-
 '''Training'''
 def train_model(epoch, data_files, label):
-    global model
     model.train()
 
     tim = time.time()
@@ -137,15 +144,14 @@ def train_model(epoch, data_files, label):
     for index in range(int(len(data_files)/args.batch_size)):
         current_video = load_next_batch(data_files[index*args.batch_size:(index+1)*args.batch_size])
         current_label = np.asarray(label[index*args.batch_size:(index+1)*args.batch_size])
-        # print(current_label.shape)
         target = torch.from_numpy((current_label))
         if torch.cuda.is_available():
             target = target.cuda()
         target = Variable(target)
 
-        prev0 = create_lstm_states(model.convlstm_0.output_shape)
-        prev1 = create_lstm_states(model.convlstm_1.output_shape)
-        prev2 = create_lstm_states(model.convlstm_2.output_shape)
+        prev0 = create_lstm_states(model.convlstm_0.output_shape, args.batch_size)
+        prev1 = create_lstm_states(model.convlstm_1.output_shape, args.batch_size)
+        prev2 = create_lstm_states(model.convlstm_2.output_shape, args.batch_size)
         states = [prev0, prev1, prev2]
         optimizer.zero_grad()
 
@@ -156,7 +162,7 @@ def train_model(epoch, data_files, label):
             data = Variable(data)
 
             output, states = model(data, states)
-            predicted_list.append(F.sigmoid(output))
+            predicted_list.append(output)
             y_list.append(target)
 
         pred = torch.cat(predicted_list)
@@ -179,7 +185,6 @@ def train_model(epoch, data_files, label):
 
 '''Testing/Validation'''
 def test_model(data_files, label):
-    global model
     model.eval()
 
     tim = time.time()
@@ -191,15 +196,14 @@ def test_model(data_files, label):
     for index in range(int(len(data_files)/args.batch_size)):
         current_video = load_next_batch(data_files[index*args.batch_size:(index+1)*args.batch_size])
         current_label = np.asarray(label[index*args.batch_size:(index+1)*args.batch_size])
-        # print(current_label.shape)
         target = torch.from_numpy((current_label))
         if torch.cuda.is_available():
             target = target.cuda()
         target = Variable(target.float())
 
-        prev0 = create_lstm_states(model.convlstm_0.output_shape)
-        prev1 = create_lstm_states(model.convlstm_1.output_shape)
-        prev2 = create_lstm_states(model.convlstm_2.output_shape)
+        prev0 = create_lstm_states(model.convlstm_0.output_shape, args.batch_size)
+        prev1 = create_lstm_states(model.convlstm_1.output_shape, args.batch_size)
+        prev2 = create_lstm_states(model.convlstm_2.output_shape, args.batch_size)
         states = [prev0, prev1, prev2]
 
         for inner_index in range(int(current_video.shape[0])):
@@ -209,8 +213,8 @@ def test_model(data_files, label):
             data = Variable(data, volatile=True)
 
             output, states = model(data, states)
-            test_loss += F.binary_cross_entropy(F.sigmoid(output), target, size_average=False).data[0] # sum up batch loss
-            pred = F.sigmoid(output).data.max(1, keepdim=True)[0] # get the index of the max log-probability
+            test_loss += F.binary_cross_entropy(output, target, size_average=False).data[0] # sum up batch loss
+            pred = torch.round(output.data) # get the index of the max log-probability
             correct += pred.eq(target.data.view_as(pred)).sum()
             instance_counter+=1
 
@@ -219,14 +223,72 @@ def test_model(data_files, label):
     print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.4f}%)'.format(
         test_loss, correct, instance_counter * args.batch_size,
         100. * correct / (instance_counter * args.batch_size)))
-    return str(100. * correct / (instance_counter * args.batch_size))
+    return 100. * correct / (instance_counter * args.batch_size)
+
+
+'''Visualize Activations'''
+
+def visualize_learning(data_files, label, hit_or_miss):
+    model.eval()
+
+    tim = time.time()
+    test_loss = 0
+    correct = 0
+    instance_counter = 0
+    test_step_counter = 0
+    activation_list = []
+
+    current_video = load_next_batch(data_files[0:(0+1)])
+    current_label = np.asarray(label[0:(0+1)])
+
+    target = torch.from_numpy((current_label))
+
+    if torch.cuda.is_available():
+        target = target.cuda()
+    target = Variable(target.float())
+
+    prev0 = create_lstm_states(model.convlstm_0.output_shape, 1)
+    prev1 = create_lstm_states(model.convlstm_1.output_shape, 1)
+    prev2 = create_lstm_states(model.convlstm_2.output_shape, 1)
+    states = [prev0, prev1, prev2]
+
+    for inner_index in range(int(current_video.shape[0])):
+        data = torch.from_numpy(current_video[inner_index]).float()
+        if torch.cuda.is_available():
+            data = data.cuda()
+        data = Variable(data, volatile=True)
+
+        output, states = model(data, states)
+
+        visualize_0 = np.transpose(np.asarray([states[0][0].data.cpu().numpy(), states[0][1].data.cpu().numpy()]),(1, 0, 3, 4, 2))
+        visualize_1 = np.transpose(np.asarray([states[1][0].data.cpu().numpy(), states[1][1].data.cpu().numpy()]),(1, 0, 3, 4, 2))
+        visualize_2 = np.transpose(np.asarray([states[2][0].data.cpu().numpy(), states[2][1].data.cpu().numpy()]),(1, 0, 3, 4, 2))
+        print(visualize_0.shape, "hi")
+
+        activation_list.append([visualize_0, visualize_1, visualize_2])
+
+        test_loss += F.binary_cross_entropy(output, target, size_average=False).data[0] # sum up batch loss
+        pred = torch.round(output.data) # get the index of the max log-probability
+        correct += pred.eq(target.data.view_as(pred)).sum()
+        instance_counter+=1
+
+    visualizer = VisualizeActivations(activation_list, np.squeeze(current_video))
+    visualizer.visualize_activation()
+
+
+    test_loss /= (instance_counter * args.batch_size)
+    print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.4f}%)'.format(
+        test_loss, correct, instance_counter * args.batch_size,
+        100. * correct / (instance_counter * args.batch_size)))
+    return 100. * correct / (instance_counter * args.batch_size)
 
 
 '''Helper Functions'''
-def create_lstm_states(shape):
-    c = Variable(torch.zeros(args.batch_size, shape[0], shape[1], shape[2])).float().cuda()
-    h = Variable(torch.zeros(args.batch_size, shape[0], shape[1], shape[2])).float().cuda()
+def create_lstm_states(shape, batch_size):
+    c = Variable(torch.zeros(batch_size, shape[0], shape[1], shape[2])).float().cuda()
+    h = Variable(torch.zeros(batch_size, shape[0], shape[1], shape[2])).float().cuda()
     return (h, c)
+
 
 def load_next_batch(string_names):
     lst = []
@@ -238,6 +300,7 @@ def load_next_batch(string_names):
     movies = np.transpose(movies, (1, 0, 2, 3, 4))
     return movies
 
+
 def print_parameters(params_list):
     total = 0
     for element in params_list:
@@ -248,10 +311,25 @@ def print_parameters(params_list):
         total+=adder
     print("Total number of paramters in model:", total)
 
+
 def view_image(image, name):
     plt.imshow(image.numpy(), cmap='gray')
     plt.title(name)
     plt.show()
+
+
+def save_model(model, acc):
+    torch.save(model.state_dict(), base_dir + '/machine_learning/saved_models/' + str(acc) + '.pth')
+
+
+def load_model(path):
+    global model
+    try:
+        model.load_state_dict(torch.load(base_dir + "/machine_learning/saved_models/" + path + ".pth"))
+    except ValueError:
+        print("Not a valid model to load")
+        sys.exit()
+
 
 '''Initialize experiment'''
 def main():
@@ -269,11 +347,24 @@ def main():
     #returns absolute path to files of videos
     train, train_class, val, val_class, test, test_class = generator.prepare_data()
 
-
-
-    for index in range(args.num_epochs):
-        train_model(index, train, train_class)
-        test_model(val, val_class)
+    if args.exp_type == 'train':
+        print("Training")
+        best_acc = 0.0
+        for index in range(args.num_epochs):
+            train_model(index, train, train_class)
+            acc = test_model(val, val_class)
+            print("\n\n**************************************************\n")
+            if acc > best_acc:
+                best_acc = acc
+                save_model(model, acc)
+    elif args.exp_type == 'test':
+        print("Loading and Testing")
+        load_model(args.model_to_load)
+        acc = test_model(test, test_class)
+    else:
+        print("Visualizing")
+        load_model(args.model_to_load)
+        visualize_learning(test, test_class, args.hit_or_miss)
 
 
 if __name__ == '__main__':
