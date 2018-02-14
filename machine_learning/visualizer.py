@@ -10,12 +10,12 @@ import matplotlib.pyplot as plt
 from matplotlib import cm, colors
 
 class VisualizeActivations(object):
-    def __init__(self, act_list, movie):
+    def __init__(self, act_list, movie, h_or_c):
 
         self.layer = 0
         self.stride = 5
         self.activation_list = act_list #shape should be list of [next0, next1, next2] -- next0 should be shape 64, 2, 32, 32, 20
-        self.h_or_c = 0 #1 if I want c
+        self.h_or_c = h_or_c #1 if I want c
 
         print("initializing visualizer")
         self.video = movie

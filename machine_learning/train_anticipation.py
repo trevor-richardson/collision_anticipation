@@ -51,11 +51,14 @@ parser.add_argument('--exp_iteration', type=int, default=64, metavar='N',
 parser.add_argument('--batch_size', type=int, default=64, metavar='N',
                     help='Number of hit and number of miss videos (default 64)')
 
+parser.add_argument('--h_or_c', type=int, default=0, metavar='N',
+                    help='Zero if I want to visualize h_t 1 if I want to visualize c_t (default 0)')
+
 parser.add_argument('--view_model_params', type=str2bool, nargs='?', default=False,
                     help='This variable stores outputs and targets in a list to bp all at once (default: True)')
 
-parser.add_argument('--hit_or_miss', type=str2bool, nargs='?', default=False,
-                    help='Default is false which means a hit video')
+parser.add_argument('--view_hit', type=str2bool, nargs='?', default=True,
+                    help='Default is True which means a hit video')
 
 parser.add_argument('--exp_type', default='train', type=str,
                     help='This is type of expirement I want to run (train, test, visualize)')
@@ -228,8 +231,19 @@ def test_model(data_files, label):
 
 '''Visualize Activations'''
 
-def visualize_learning(data_files, label, hit_or_miss):
+def visualize_learning(data_files, label, view_hit):
     model.eval()
+    index = 0
+    if view_hit:
+        for element in label:
+            if element == 1:
+                break
+            index+=1
+    else:
+        for element in label:
+            if element == 0:
+                break
+            index+=1
 
     tim = time.time()
     test_loss = 0
@@ -238,8 +252,8 @@ def visualize_learning(data_files, label, hit_or_miss):
     test_step_counter = 0
     activation_list = []
 
-    current_video = load_next_batch(data_files[0:(0+1)])
-    current_label = np.asarray(label[0:(0+1)])
+    current_video = load_next_batch(data_files[index:(index+1)])
+    current_label = np.asarray(label[index:(index+1)])
 
     target = torch.from_numpy((current_label))
 
@@ -263,7 +277,6 @@ def visualize_learning(data_files, label, hit_or_miss):
         visualize_0 = np.transpose(np.asarray([states[0][0].data.cpu().numpy(), states[0][1].data.cpu().numpy()]),(1, 0, 3, 4, 2))
         visualize_1 = np.transpose(np.asarray([states[1][0].data.cpu().numpy(), states[1][1].data.cpu().numpy()]),(1, 0, 3, 4, 2))
         visualize_2 = np.transpose(np.asarray([states[2][0].data.cpu().numpy(), states[2][1].data.cpu().numpy()]),(1, 0, 3, 4, 2))
-        print(visualize_0.shape, "hi")
 
         activation_list.append([visualize_0, visualize_1, visualize_2])
 
@@ -272,7 +285,7 @@ def visualize_learning(data_files, label, hit_or_miss):
         correct += pred.eq(target.data.view_as(pred)).sum()
         instance_counter+=1
 
-    visualizer = VisualizeActivations(activation_list, np.squeeze(current_video))
+    visualizer = VisualizeActivations(activation_list, np.squeeze(current_video), args.h_or_c)
     visualizer.visualize_activation()
 
 
@@ -364,7 +377,7 @@ def main():
     else:
         print("Visualizing")
         load_model(args.model_to_load)
-        visualize_learning(test, test_class, args.hit_or_miss)
+        visualize_learning(test, test_class, args.view_hit)
 
 
 if __name__ == '__main__':
