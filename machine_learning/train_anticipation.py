@@ -27,8 +27,7 @@ from visualizer import VisualizeActivations
 
 '''Argparse Variables for Dynamic Experimentation
 
-Need to allow for padding
-Need to implement demo with current system
+Need to allow for padding !!!!!!!!!!!!
 Need to update readme and take a video
 Need to post open to github
 
