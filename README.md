@@ -32,12 +32,12 @@ check out data_generator.py
 ### Installing
 
 Packages needed to run the code
-numpy
-scipy
-python3
-pytorch
-matplotlib
-vrep
+* numpy
+* scipy
+* python3
+* pytorch
+* matplotlib
+* vrep
 
 I used ubuntu 16.04
 
