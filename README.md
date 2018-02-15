@@ -8,8 +8,8 @@ A custom built deep [Convolutional LSTM](https://arxiv.org/pdf/1506.04214.pdf), 
 projectile motion. The projectile is set in projectile motion with an intial random velocity in
 the x, y and z direction.
 
-Trained on 3000 hit and miss simulations. -- Input to the neural network is a (64, 64, 3) image
-Validated and tested on over 600 other randomly generated simulations.
+Trained on 3000 hit and miss simulations. -- Input to the neural network is a (70, 64, 64, 3) video
+of images validated and tested on over 600 other randomly generated simulations.
 
 ## Specific contributions
 
