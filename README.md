@@ -13,17 +13,17 @@ Validated and tested on over 600 other randomly generated simulations.
 
 Specific contributions
 * Custom Built ConvLSTM Cell Class
-'''
+```
 check out conv_lstm_cell.py, anticipation_model.py
-'''
+```
 * "Dodgeball" robotic simulation in [V-REP](http://www.coppeliarobotics.com/)
-'''
+```
 check out demo.ttt
-'''
+```
 * Visualization Class that can view the activations or cell state (what's been learned) of ConvLSTM
-'''
+```
 check out visualizer.py
-'''
+```
 * Data generator that doesn't crash your RAM by loading filepaths and just in time producing video tensors (70, 64, 64, 3)
 ### Installing
 
@@ -45,18 +45,19 @@ is custom and there are filepaths in both that need to be changed in order to ru
 ### Scripts to run
 
 If properly installed, and demo.ttt is loaded in V-REP one can dodge balls with the script:
-
+```
   python3 stateful_demo.py
-
+```
 One can visualize activations by running:
-
+```
   python3 train_anticipation.py --exp_type=activations
-
+```
 One can train new models by:
-
+```
   python3 train_anticipation.py
-
+```
 
 One collect data by running the following script with current_scene.ttt loaded in V-REP:
-
+```
   python3 run_vrep_simulation.py
+```
