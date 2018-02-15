@@ -30,7 +30,6 @@ from visualizer import VisualizeActivations
 Need to allow for padding !!!!!!!!!!!!
 Need to update readme and take a video
 Need to post open to github
-
 '''
 
 def str2bool(v):

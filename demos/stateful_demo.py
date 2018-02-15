@@ -33,7 +33,7 @@ parser.add_argument('--kernel_0', type=int, default=5, metavar='N',
 parser.add_argument('--strides', type=int, default=2, metavar='N',
                     help='Strides for the convolutions in the convlstm layers (default 2)')
 
-parser.add_argument('--model_path', default='87.75111607142857.pth', type=str,
+parser.add_argument('--model_path', default='89.44754464285714.pth', type=str,
                     help='This is type of expirement I want to run (train, test, visualize)')
 
 parser.add_argument('--no_filters_0', type=int, default=40, metavar='N',
