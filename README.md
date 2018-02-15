@@ -11,7 +11,8 @@ the x, y and z direction.
 Trained on 3000 hit and miss simulations. -- Input to the neural network is a (64, 64, 3) image
 Validated and tested on over 600 other randomly generated simulations.
 
-Specific contributions
+##Specific contributions
+
 * Custom Built ConvLSTM Cell Class
 ```
 check out conv_lstm_cell.py, anticipation_model.py
@@ -25,6 +26,9 @@ check out demo.ttt
 check out visualizer.py
 ```
 * Data generator that doesn't crash your RAM by loading filepaths and just in time producing video tensors (70, 64, 64, 3)
+```
+check out data_generator.py
+```
 ### Installing
 
 Packages needed to run the code
