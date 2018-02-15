@@ -11,7 +11,7 @@ the x, y and z direction.
 Trained on 3000 hit and miss simulations. -- Input to the neural network is a (64, 64, 3) image
 Validated and tested on over 600 other randomly generated simulations.
 
-##Specific contributions
+## Specific contributions
 
 * Custom Built ConvLSTM Cell Class
 ```
