@@ -17,7 +17,6 @@ base_dir = config['DEFAULT']['BASE_DIR']
 
 '''
 This is my main script to generate data from my vrep scene. This collects the video data and the collision ground truth
-
 '''
 
 x_list_of_positions = np.random.normal(0, 1.2, 30000)

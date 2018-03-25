@@ -15,46 +15,6 @@ class StatefulConv2dLSTMCell(nn.Module):
     def __init__(self, input_shape, no_filters, kernel_shape, strides, pad=0, weight_init=None, reccurent_weight_init=None,  cell_weight_init=None, bias_init=None, drop=None, rec_drop=None):
         super(StatefulConv2dLSTMCell, self).__init__()
 
-        # if(weight_init==None):
-        #     #weights need to be the shape of input or x and the output
-        #     self.W_f = nn.Parameter(torch.zeros(kernel_shape[0], kernel_shape[1], int(input_shape[-1]), no_filters))
-        #     self.W_f = nn.init.xavier_normal(self.W_f)
-        #     self.W_i = nn.Parameter(torch.zeros(kernel_shape[0], kernel_shape[1], int(input_shape[-1]), no_filters))
-        #     self.W_i = nn.init.xavier_normal(self.W_i)
-        #     self.W_o = nn.Parameter(torch.zeros(kernel_shape[0], kernel_shape[1], int(input_shape[-1]), no_filters))
-        #     self.W_o = nn.init.xavier_normal(self.W_o)
-        #     self.W_c = nn.Parameter(torch.zeros(kernel_shape[0], kernel_shape[1], int(input_shape[-1]), no_filters))
-        #     self.W_c = nn.init.xavier_normal(self.W_c)
-        # else:
-        #     self.W_f = nn.Parameter(torch.zeros(kernel_shape[0], kernel_shape[1], int(input_shape[-1]), no_filters))
-        #     self.W_f = weight_init(self.W_f)
-        #     self.W_i = nn.Parameter(torch.zeros(kernel_shape[0], kernel_shape[1], int(input_shape[-1]), no_filters))
-        #     self.W_i = weight_init(self.W_i)
-        #     self.W_o = nn.Parameter(torch.zeros(kernel_shape[0], kernel_shape[1], int(input_shape[-1]), no_filters))
-        #     self.W_o = weight_init(self.W_o)
-        #     self.W_c = nn.Parameter(torch.zeros(kernel_shape[0], kernel_shape[1], int(input_shape[-1]), no_filters))
-        #     self.W_c = weight_init(self.W_c)
-        #
-        # if(reccurent_weight_init == None):
-        #     #Weight matrices for hidden state
-        #     self.U_f = nn.Parameter(torch.zeros(kernel_shape[0], kernel_shape[1], no_filters, no_filters))
-        #     self.U_f = nn.init.xavier_normal(self.U_f)
-        #     self.U_i = nn.Parameter(torch.zeros(kernel_shape[0], kernel_shape[1], no_filters, no_filters))
-        #     self.U_i = nn.init.xavier_normal(self.U_i)
-        #     self.U_o = nn.Parameter(torch.zeros(kernel_shape[0], kernel_shape[1], no_filters, no_filters))
-        #     self.U_o = nn.init.xavier_normal(self.U_o)
-        #     self.U_c = nn.Parameter(torch.zeros(kernel_shape[0], kernel_shape[1], no_filters, no_filters))
-        #     self.U_c = nn.init.xavier_normal(self.U_c)
-        # else:
-        #     self.U_f = nn.Parameter(torch.zeros(kernel_shape[0], kernel_shape[1], no_filters, no_filters))
-        #     self.U_f = recurrent_weight_initializer(self.U_f)
-        #     self.U_i = nn.Parameter(torch.zeros(kernel_shape[0], kernel_shape[1], no_filters, no_filters))
-        #     self.U_i = recurrent_weight_initializer(self.U_i)
-        #     self.U_o = nn.Parameter(torch.zeros(kernel_shape[0], kernel_shape[1], no_filters, no_filters))
-        #     self.U_o = recurrent_weight_initializer(self.U_o)
-        #     self.U_c = nn.Parameter(torch.zeros(kernel_shape[0], kernel_shape[1], no_filters, no_filters))
-        #     self.U_c = recurrent_weight_initializer(self.U_c)
-
         #This needs to be different depending on padding
         if(cell_weight_init == None):
             #Weight matrices for hidden state
@@ -96,7 +56,7 @@ class StatefulConv2dLSTMCell(nn.Module):
         self.no_filters = no_filters
         self.inp_shape = input_shape
 
-        #for now no padding
+        #for now no padding need to update padding
 
         self.conv2d_x_f = nn.Conv2d(input_shape[0], no_filters, kernel_shape, stride=strides, padding=pad)
         self.conv2d_x_i = nn.Conv2d(input_shape[0], no_filters, kernel_shape, stride=strides, padding=pad)

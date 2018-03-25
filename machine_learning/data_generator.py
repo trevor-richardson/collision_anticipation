@@ -69,11 +69,11 @@ class VideoDataGenerator(object):
         sizeoftrain = self.train_number_of_hit + self.train_number_of_miss
         for enumerator in range(sizeoftrain):
             rand = random.uniform(0,1)
-            if (miss_counter > self.train_number_of_hit -1):
+            if (miss_counter > self.train_number_of_miss -1):
                 self.train.append(train_hit[hit_counter])
                 self.train_class.append(classification1)
                 hit_counter+=1
-            elif (hit_counter > self.train_number_of_miss -1):
+            elif (hit_counter > self.train_number_of_hit -1):
                 self.train.append(train_miss[miss_counter])
                 self.train_class.append(classification0)
                 miss_counter+=1

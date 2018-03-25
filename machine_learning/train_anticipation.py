@@ -7,7 +7,6 @@ import scipy.io as sio
 import os
 from os.path import isfile, join
 from os import listdir
-import threading
 
 import torch
 import torch.nn as nn
@@ -242,14 +241,12 @@ def visualize_learning(data_files, label, view_hit):
             if element == 0:
                 break
             index+=1
-
     tim = time.time()
     test_loss = 0
     correct = 0
     instance_counter = 0
     test_step_counter = 0
     activation_list = []
-
     current_video = load_next_batch(data_files[index:(index+1)])
     current_label = np.asarray(label[index:(index+1)])
 
@@ -283,9 +280,11 @@ def visualize_learning(data_files, label, view_hit):
         correct += pred.eq(target.data.view_as(pred)).sum()
         instance_counter+=1
 
+    print(activation_list[0])
+    print(np.squeeze(current_video).shape)
+
     visualizer = VisualizeActivations(activation_list, np.squeeze(current_video), args.h_or_c)
     visualizer.visualize_activation()
-
 
     test_loss /= (instance_counter * args.batch_size)
     print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.4f}%)'.format(

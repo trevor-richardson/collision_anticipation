@@ -19,6 +19,7 @@ class VisualizeActivations(object):
 
         print("initializing visualizer")
         self.video = movie
+        print(self.video.shape, "init")
         if self.layer == 0:
             self.num_row = 7
             self.num_column = 6
@@ -37,10 +38,14 @@ class VisualizeActivations(object):
         count = 0
         prev_var =0
         for element in self.activation_list:
+            print(element[0].shape, "element")
             var = element[self.layer][0][self.h_or_c]
+            print("var", var.shape)
             for filter_no in range(len(var[0][0])):
                 var2 = (var[:, :, filter_no])
                 var2 = 255*var2
+                # print(var2.shape, "shape")
+
                 act_list.append(var2)
             self.plot_activations(act_list, count, self.video[count])
             prev_var = var
@@ -57,6 +62,7 @@ class VisualizeActivations(object):
         count = 0
         stride_count = 1
         plt.subplot(self.num_row, self.num_column, 1)
+        print(np.transpose(original_image, (1, 2, 0)).shape, "trans")
         plt.imshow(np.transpose(original_image, (1, 2, 0)))
         plt.title('Original Image')
         frame1 = plt.gca()
@@ -65,6 +71,7 @@ class VisualizeActivations(object):
         if timestep % self.stride == 0:
             for activation in activations_list:
                 plt.subplot(self.num_row, self.num_column, count+2)
+                print(activation.shape)
                 plt.imshow(activation, cmap=cm.gray)
                 plt.title('Convolution '+ str(count))
                 frame1 = plt.gca()
