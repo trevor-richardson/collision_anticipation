@@ -280,8 +280,7 @@ def visualize_learning(data_files, label, view_hit):
         correct += pred.eq(target.data.view_as(pred)).sum()
         instance_counter+=1
 
-    print(activation_list[0])
-    print(np.squeeze(current_video).shape)
+
 
     visualizer = VisualizeActivations(activation_list, np.squeeze(current_video), args.h_or_c)
     visualizer.visualize_activation()
