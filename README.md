@@ -13,20 +13,20 @@ of images validated and tested on over 600 other randomly generated simulations.
 ## Demo
 <br/>
 Simple deterministic algorithm that chooses left or right randomly when prediction of future collision is above simple threshold. <br/> <br/>
-<img src="https://github.com/trevor-richardson/collision_anticipation/blob/master/visualizations/t1.gif" width="750">
+<img src="https://github.com/trevor-richardson/collision_anticipation/blob/master/visualizations/t1.gif" width="950">
 
 ---
 
 <br/>
 Depiction of input to neural network at inference time. <br/> <br/>
-<img src="https://github.com/trevor-richardson/collision_anticipation/blob/master/visualizations/t2.gif" width="750">
+<img src="https://github.com/trevor-richardson/collision_anticipation/blob/master/visualizations/t2.gif" width="950">
 
 ---
 
 <br/>
 Visualization of learned cell state and hidden output for ConvLSTM layer 0. <br/> <br/>
-<img src="https://github.com/trevor-richardson/collision_anticipation/blob/master/visualizations/hidden_0.gif" width="750">
-<img src="https://github.com/trevor-richardson/collision_anticipation/blob/master/visualizations/cell_0.gif" width="750">
+<img src="https://github.com/trevor-richardson/collision_anticipation/blob/master/visualizations/hidden_0.gif" width="950">
+<img src="https://github.com/trevor-richardson/collision_anticipation/blob/master/visualizations/cell_0.gif" width="950">
 
 ## Specific contributions
 
@@ -46,20 +46,6 @@ check out visualizer.py
 ```
 check out data_generator.py
 ```
-### Installing
-
-Packages needed to run the code
-* numpy
-* scipy
-* python3
-* pytorch
-* matplotlib
-* vrep
-
-Change base_dir in config.ini to the absolute path of the current directory.
-
-In the vrep_scenes directory both the demo.ttt and current_scene.ttt have lua code written for the sphere object that
-is custom and there are filepaths in both that need to be changed in order to run -- both need to point at the vrep_scripts folder
 
 ### Scripts to run
 
@@ -80,3 +66,15 @@ One collect data by running the following script with current_scene.ttt loaded i
 ```
   python3 run_vrep_simulation.py
 ```
+
+### Installing
+Change base_dir in config.ini to the absolute path of the current directory. <br/>
+Packages needed to run the code.
+* numpy
+* scipy
+* python3
+* pytorch
+* matplotlib
+* vrep
+
+In the vrep_scenes directory both demo.ttt and current_scene.ttt have lua code written for the sphere object that is custom and there are filepaths in both that need to be changed in order to run -- both need to point at the vrep_scripts folder.
