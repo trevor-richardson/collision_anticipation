@@ -14,9 +14,16 @@ of images validated and tested on over 600 other randomly generated simulations.
 <!-- <img src="https://github.com/trevor-richardson/collision_anticipation/blob/master/visualizations/t1.gif" width="950"> -->
 
 ## Demo
-<img src="https://github.com/trevor-richardson/collision_anticipation/blob/master/visualizations/t1.gif" width="950">
 
-<img src="https://github.com/trevor-richardson/collision_anticipation/blob/master/visualizations/t2.gif" width="950">
+Deep Learning Convolutionally recurrent Neural network that learns the functional mapping between video input and probability of future collisions. 
+
+<p float="left">
+<img src="https://github.com/trevor-richardson/collision_anticipation/blob/master/visualizations/t1.gif" width="440">
+
+<img src="https://github.com/trevor-richardson/collision_anticipation/blob/master/visualizations/t2.gif" width="440">
+</p>
+
+
 ## Specific contributions
 
 * Custom Built ConvLSTM Cell Class
