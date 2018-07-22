@@ -63,7 +63,7 @@ parser.add_argument('--exp_type', default='train', type=str,
 parser.add_argument('--visualize_str', default='h_t', type=str,
                     help='If we are visualizing the hidden activations or cell state use this')
 
-parser.add_argument('--model_to_load', default='87.75111607142857', type=str,
+parser.add_argument('--model_to_load', default='89.44754464285714', type=str,
                     help='This is the model of interest to load')
 
 parser.add_argument('--num_epochs', type=int, default=50, metavar='N',
@@ -181,6 +181,7 @@ def train_model(epoch, data_files, label):
     # print(loss.data[0], train_loss.cpu().numpy()[0], train_loss.cpu().numpy()[0]/train_step_counter)
     print('Train Epoch: {}\tLoss: {:.6f}'.format(
         epoch, train_loss.cpu().numpy()[0]/train_step_counter))
+    return train_loss.cpu().numpy()[0]/train_step_counter
 
 
 '''Testing/Validation'''
@@ -353,15 +354,15 @@ def main():
     generator = VideoDataGenerator(training_directory, validation_directory,
     testing_directory, args.no_train_vid, args.no_val_vid, args.no_test_vid)
 
-    #returns absolute path to files of videos
     train, train_class, val, val_class, test, test_class = generator.prepare_data()
-
+    accuracies = []
     if args.exp_type == 'train':
         print("Training")
         best_acc = 0.0
         for index in range(args.num_epochs):
-            train_model(index, train, train_class)
+            tr_acc = train_model(index, train, train_class)
             acc = test_model(val, val_class)
+            accuracies.append([tr_acc, acc])
             print("\n\n**************************************************\n")
             if acc > best_acc:
                 best_acc = acc
@@ -374,7 +375,7 @@ def main():
         print("Visualizing")
         load_model(args.model_to_load)
         visualize_learning(test, test_class, args.view_hit)
-
+    np.save("graph_acc", np.asarray(accuracies))
 
 if __name__ == '__main__':
     main()

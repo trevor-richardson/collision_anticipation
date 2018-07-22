@@ -48,7 +48,7 @@ parser.add_argument('--no_filters_2', type=int, default=20, metavar='N',
 parser.add_argument('--drop_rte', type=float, default=.3, metavar='N',
                     help='dropout rate (default .3)')
 #Demo specific global variables
-parser.add_argument('--num_runs', type=int, default=15, metavar='N',
+parser.add_argument('--num_runs', type=int, default=40, metavar='N',
                     help='This represents the number of times to run the simulation in the background (default 15)')
 
 args = parser.parse_args()
@@ -141,7 +141,8 @@ def runModel(clientID, current_iteration, states):
                     #The following just checks the recent 8 pain values and reasons based on the minimum value
                     if (check_my_pain > 14 and pain_bool):
                         recent_pain_values = pain_values_list[-8:]
-                        if(min(recent_pain_values) > .5 ):
+                        print(pain_values_list[-1])
+                        if(min(recent_pain_values) > .8 ):
                             pain_bool = False
                             print("predicting hit " , check_my_pain, min(recent_pain_values))
                             if np.random.uniform() < .5:
@@ -153,7 +154,8 @@ def runModel(clientID, current_iteration, states):
 
                     if(not pain_bool):
                         recent_pain_values = pain_values_list[-8:]
-                        if (min(recent_pain_values) < .5):
+                        print(pain_values_list[-1])
+                        if (min(recent_pain_values) < .8):
                             pain_bool = True
                             print("IM SAFE NOW")
                             return_val = vrep.simxSetJointTargetVelocity(clientID, left_handle, 0, vrep.simx_opmode_oneshot)
