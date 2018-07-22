@@ -1,27 +1,30 @@
 # Robot Pain Anticipation
 
-The following is a proof of concept and simulation implementation of a spatio-temporal
-machine learning deep neural network that predicts future collisions before they occur.
+Deep Learning Convolutionally recurrent Neural network that learns the functional mapping between video data and the probability of future collisions.
 
 A custom built deep [Convolutional LSTM](https://arxiv.org/pdf/1506.04214.pdf), implemented in
 [PyTorch](http://pytorch.org/) is used to predict future collisions with an object placed in
 projectile motion. The projectile is set in projectile motion with an intial random velocity in
-the x, y and z direction.
+the x, y and z direction. Hit and miss simulations determined by self-supervised [deep dynamics](https://github.com/trevor-richardson/deep_dynamics) collision detection mechanism.
 
 Trained on 3000 hit and miss simulations. -- Input to the neural network is a (70, 64, 64, 3) video
 of images validated and tested on over 600 other randomly generated simulations.
 
-<!-- <img src="https://github.com/trevor-richardson/collision_anticipation/blob/master/visualizations/t1.gif" width="950"> -->
-
 ## Demo
 
-Deep Learning Convolutionally recurrent Neural network that learns the functional mapping between video input and probability of future collisions. 
+Simple deterministic algorithm that chooses left or right randomly when prediction of future collision is above simple threshold.
+<img src="https://github.com/trevor-richardson/collision_anticipation/blob/master/visualizations/t1.gif" width="750">
 
-<p float="left">
-<img src="https://github.com/trevor-richardson/collision_anticipation/blob/master/visualizations/t1.gif" width="440">
+---
 
-<img src="https://github.com/trevor-richardson/collision_anticipation/blob/master/visualizations/t2.gif" width="440">
-</p>
+/
+Depiction of input to neural network at inference time
+<img src="https://github.com/trevor-richardson/collision_anticipation/blob/master/visualizations/t2.gif" width="750">
+
+---
+
+/
+Visualization of learned cell state and hidden output for ConvLSTM layers 0, 1, 2.
 
 
 ## Specific contributions
