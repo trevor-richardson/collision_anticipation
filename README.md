@@ -1,31 +1,32 @@
 # Robot Pain Anticipation
-
-Deep Learning Convolutionally recurrent Neural network that learns the functional mapping between video data and the probability of future collisions.
+<br/>
+Deep Learning Convolutionally recurrent Neural network that learns the functional mapping between video data and the probability of future collisions. <br/> <br/>
 
 A custom built deep [Convolutional LSTM](https://arxiv.org/pdf/1506.04214.pdf), implemented in
 [PyTorch](http://pytorch.org/) is used to predict future collisions with an object placed in
 projectile motion. The projectile is set in projectile motion with an intial random velocity in
-the x, y and z direction. Hit and miss simulations determined by self-supervised [deep dynamics](https://github.com/trevor-richardson/deep_dynamics) collision detection mechanism.
+the x, y and z direction. Hit and miss simulations determined by self-supervised [deep dynamics](https://github.com/trevor-richardson/deep_dynamics) collision detection mechanism. <br/> <br/>
 
 Trained on 3000 hit and miss simulations. -- Input to the neural network is a (70, 64, 64, 3) video
-of images validated and tested on over 600 other randomly generated simulations.
+of images validated and tested on over 600 other randomly generated simulations. <br/>
 
 ## Demo
-
-Simple deterministic algorithm that chooses left or right randomly when prediction of future collision is above simple threshold.
+<br/>
+Simple deterministic algorithm that chooses left or right randomly when prediction of future collision is above simple threshold. <br/> <br/>
 <img src="https://github.com/trevor-richardson/collision_anticipation/blob/master/visualizations/t1.gif" width="750">
 
 ---
 
-/
-Depiction of input to neural network at inference time
+<br/>
+Depiction of input to neural network at inference time. <br/> <br/>
 <img src="https://github.com/trevor-richardson/collision_anticipation/blob/master/visualizations/t2.gif" width="750">
 
 ---
 
-/
-Visualization of learned cell state and hidden output for ConvLSTM layers 0, 1, 2.
-
+<br/>
+Visualization of learned cell state and hidden output for ConvLSTM layer 0. <br/> <br/>
+<img src="https://github.com/trevor-richardson/collision_anticipation/blob/master/visualizations/hidden_0.gif" width="750">
+<img src="https://github.com/trevor-richardson/collision_anticipation/blob/master/visualizations/cell_0.gif" width="750">
 
 ## Specific contributions
 
@@ -55,9 +56,7 @@ Packages needed to run the code
 * matplotlib
 * vrep
 
-I used ubuntu 16.04
-
-In order to make the code work change base_dir in config.ini to absolute path where /collision_anticipation exists
+Change base_dir in config.ini to the absolute path of the current directory.
 
 In the vrep_scenes directory both the demo.ttt and current_scene.ttt have lua code written for the sphere object that
 is custom and there are filepaths in both that need to be changed in order to run -- both need to point at the vrep_scripts folder
