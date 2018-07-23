@@ -16,7 +16,7 @@ Each network is trained on 3000 hit and miss simulations. The input to the neura
 
 ## Demo
 <br/>
-The video below demos a simple deterministic algorithm that chooses left or right randomly when the network predicts a future collision above chosen threshold. <br/> <br/>
+The video below demos a simple deterministic algorithm that chooses left or right randomly when the network predicts a future collision above a chosen threshold. <br/> <br/>
 
 <img src="https://github.com/trevor-richardson/collision_anticipation/blob/master/visualizations/t1.gif" width="950">
 
