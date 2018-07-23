@@ -13,6 +13,7 @@ of images validated and tested on over 600 other randomly generated simulations.
 
 **Best model has a 91.2% per frame accuracy prediction and inferences at 60 Hertz.** <br/>
 <img src="https://github.com/trevor-richardson/collision_anticipation/blob/master/visualizations/collision_ant.png" width="950">
+<img src="https://github.com/trevor-richardson/collision_anticipation/blob/master/visualizations/sequential_modeling.png" width="950">
 
 ## Demo
 <br/>
