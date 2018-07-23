@@ -16,45 +16,42 @@ Each network is trained on 3000 hit and miss simulations. The input to the neura
 
 ## Demo
 <br/>
-The video below demos a simple deterministic algorithm that chooses left or right randomly when the network predicts a future collision above a chosen threshold. <br/> <br/>
+The video below demos a simple deterministic algorithm that chooses left or right randomly when the network prediction is above a chosen threshold, thus predicting a future collision. <br/> <br/>
 
 <img src="https://github.com/trevor-richardson/collision_anticipation/blob/master/visualizations/t1.gif" width="950">
 
 ---
 
 <br/>
-Depiction of input to neural network at inference time. <br/> <br/>
+The video below depicts the input to neural network at inference time. <br/> <br/>
 <img src="https://github.com/trevor-richardson/collision_anticipation/blob/master/visualizations/t2.gif" width="950">
 
 ---
 
 <br/>
-Visualization of learned cell state and hidden output for ConvLSTM layer 0. <br/> <br/>
+The videos below depict the cell states and hidden outputs of the anticipation neural network for ConvLSTM layer 0. <br/> <br/>
 <img src="https://github.com/trevor-richardson/collision_anticipation/blob/master/visualizations/hidden_0.gif" width="950">
 <img src="https://github.com/trevor-richardson/collision_anticipation/blob/master/visualizations/cell_0.gif" width="950">
 
 ## Specific contributions
 
-* Custom Built ConvLSTM Cell Class
+* Custom built ConvLSTM cell class
 ```
-check out conv_lstm_cell.py, anticipation_model.py
+see conv_lstm_cell.py, anticipation_model.py
 ```
 * "Dodgeball" robotic simulation in [V-REP](http://www.coppeliarobotics.com/)
 ```
-check out demo.ttt
+see demo.ttt
 ```
-* Visualization Class that can view the activations or cell state (what's been learned) of ConvLSTM
+* Visualization class that can view the activations or cell states (what's been learned) of ConvLSTM
 ```
-check out visualizer.py
+see visualizer.py
 ```
-* Data generator that doesn't crash your RAM by loading filepaths and just in time producing video tensors (70, 64, 64, 3)
-```
-check out data_generator.py
-```
+
 
 ### Scripts to run
 
-If properly installed, and demo.ttt is loaded in V-REP one can dodge balls with the script:
+If properly installed and demo.ttt is loaded in V-REP, one can dodge balls with the script:
 ```
   python3 stateful_demo.py
 ```
@@ -62,11 +59,10 @@ One can visualize activations by running:
 ```
   python3 train_anticipation.py --exp_type=activations
 ```
-One can train new models by:
+One can train new models by running:
 ```
   python3 train_anticipation.py
 ```
-
 One collect data by running the following script with current_scene.ttt loaded in V-REP:
 ```
   python3 run_vrep_simulation.py
@@ -74,7 +70,7 @@ One collect data by running the following script with current_scene.ttt loaded i
 
 ### Installing
 Change base_dir in config.ini to the absolute path of the current directory. <br/>
-Packages needed to run the code.
+Packages needed to run the code include the following:
 * numpy
 * scipy
 * python3
@@ -82,4 +78,4 @@ Packages needed to run the code.
 * matplotlib
 * vrep
 
-In the vrep_scenes directory both demo.ttt and current_scene.ttt have lua code written for the sphere object that is custom and there are filepaths in both that need to be changed in order to run -- both need to point at the vrep_scripts folder.
+In the vrep_scenes directory, both demo.ttt and current_scene.ttt have custom lua code written for the sphere object and there are filepaths in both that need to be changed in order to run. These filepaths need to point at the vrep_scripts folder.
