@@ -51,19 +51,19 @@ see visualizer.py
 
 ### Scripts to run
 
-If properly installed and demo.ttt is loaded in V-REP, one can dodge balls with the script:
+If properly installed and demo.ttt is loaded in V-REP, one can dodge balls with the script
 ```
   python3 stateful_demo.py
 ```
-One can visualize activations by running:
+One can visualize activations by running
 ```
   python3 train_anticipation.py --exp_type=activations
 ```
-One can train new models by running:
+One can train new models by running
 ```
   python3 train_anticipation.py
 ```
-One collect data by running the following script with current_scene.ttt loaded in V-REP:
+One collect data by running the following script with current_scene.ttt loaded in V-REP
 ```
   python3 run_vrep_simulation.py
 ```
